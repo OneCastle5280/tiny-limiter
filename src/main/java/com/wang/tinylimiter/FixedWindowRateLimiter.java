@@ -3,6 +3,8 @@ package com.wang.tinylimiter;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * 固定窗口限流器
+ *
  * @author wangjiabao
  */
 public class FixedWindowRateLimiter {
