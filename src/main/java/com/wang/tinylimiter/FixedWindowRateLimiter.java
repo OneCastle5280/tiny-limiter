@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author wangjiabao
  */
-public class FixedWindowRateLimiter {
+public class FixedWindowRateLimiter implements TinyLimiter{
     /**
      * 可重入锁
      */
@@ -44,6 +44,7 @@ public class FixedWindowRateLimiter {
         this.startTime = System.currentTimeMillis();
     }
 
+    @Override
     public boolean allow() {
         // 可重入锁，防并发
         lock.lock();
