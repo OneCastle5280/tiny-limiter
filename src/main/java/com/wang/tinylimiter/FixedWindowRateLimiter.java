@@ -46,9 +46,9 @@ public class FixedWindowRateLimiter implements TinyLimiter{
 
     @Override
     public boolean allow() {
-        // 可重入锁，防并发
-        lock.lock();
         try {
+            // 可重入锁，防并发
+            lock.lock();
             // 获取当前时间
             long currentTime = System.currentTimeMillis();
             if (currentTime - startTime >= windowSize) {
