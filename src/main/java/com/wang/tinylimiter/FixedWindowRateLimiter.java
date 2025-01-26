@@ -1,6 +1,6 @@
 package com.wang.tinylimiter;
 
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 固定窗口限流器
@@ -8,10 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author wangjiabao
  */
 public class FixedWindowRateLimiter implements TinyLimiter{
-    /**
-     * 可重入锁
-     */
-    private final ReentrantLock lock;
     /**
      * 固定窗口大小（单位：ms）
      */
@@ -23,11 +19,11 @@ public class FixedWindowRateLimiter implements TinyLimiter{
     /**
      * 计数器
      */
-    private Integer count;
+    private final AtomicLong count;
     /**
      * 窗口起始时间
      */
-    private Long startTime;
+    private final AtomicLong startTime;
 
     /**
      * init
@@ -39,31 +35,24 @@ public class FixedWindowRateLimiter implements TinyLimiter{
         this.windowSize = windowSize;
         this.limit = limit;
 
-        this.count = 0;
-        this.lock = new ReentrantLock();
-        this.startTime = System.currentTimeMillis();
+        this.count = new AtomicLong(0);
+        this.startTime = new AtomicLong(System.currentTimeMillis());
     }
 
     @Override
     public boolean allow() {
-        try {
-            // 可重入锁，防并发
-            lock.lock();
-            // 获取当前时间
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - startTime >= windowSize) {
-                // 已经进入到了下一个
-                this.reset(currentTime);
-            }
-            count ++;
-            return count <= limit;
-        } finally {
-            lock.unlock();
+        // 获取当前时间
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - startTime.get() >= windowSize) {
+            // 已经进入到了下一个窗口
+            this.reset(currentTime);
         }
+        return this.count.incrementAndGet() <= limit;
     }
 
     private void reset(long currentTime) {
-        this.count = 0;
-        this.startTime = currentTime;
+        // 采用 CAS 乐观锁的形式来更新，提升并发度
+        this.count.compareAndSet(this.count.get(), 0);
+        this.startTime.compareAndSet(this.startTime.get(), currentTime);
     }
 }
