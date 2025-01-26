@@ -1,9 +1,5 @@
 package com.wang.tinylimiter;
 
-import com.google.common.util.concurrent.RateLimiter;
-
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  * 令牌桶限流器
  *
