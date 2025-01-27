@@ -31,7 +31,7 @@ public class TokenBucketRateLimiter implements TinyLimiter{
     public TokenBucketRateLimiter(Integer tokenPerSecond) {
         this.tokenPerSecond = tokenPerSecond;
         this.interval = 1000L / tokenPerSecond;
-        this.currentToken = 0L;
+        this.currentToken = (long) tokenPerSecond;
         this.maxToken = tokenPerSecond;
         this.nextAvailableGetTokenTime = 0L;
     }
